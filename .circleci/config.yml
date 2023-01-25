@@ -1,6 +1,18 @@
 version: 2.1
 
 commands:
+
+  install-ansible: 
+      description: Install Ansible
+      steps:
+        - run:
+            name: Install Ansible
+            command: |
+              sudo apt update
+              sudo apt install software-properties-common -y
+              sudo add-apt-repository --yes --update ppa:ansible/ansible
+              sudo apt install ansible -y
+
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -28,23 +40,14 @@ commands:
           when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
+            SUCCESS = $(curl --insecure "https://kvdb.io/Gihzln9tKaS8UmwtTTnRhb/migration_<<parameters.workflow_id")
             if(( $SUCCESS==1 )); 
             then
               cd ~/project/backend
               npm install
               npm run migration:revert
             fi
-  install-ansible: 
-      description: Install Ansible
-      steps:
-        - run:
-            name: Install Ansible
-            command: |
-              sudo apt update
-              sudo apt install software-properties-common -y
-              sudo add-apt-repository --yes --update ppa:ansible/ansible
-              sudo apt install ansible -y
+  
   
  
 jobs:
@@ -237,7 +240,7 @@ jobs:
           command: |
             if grep -q "has been executed successfully"  ./backend/migrations_dump.txt   
             then
-              curl  https://kvdb.io/${KVDB_BUCKET}/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d "1"
+              curl  https://kvdb.io/KSM56FiMvHq5eCbQF1e4NV/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d "1"
             
             fi
       - destroy-environment
