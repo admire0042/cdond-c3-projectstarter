@@ -215,6 +215,16 @@ jobs:
            at: ~/
 
       - install-ansible
+
+      - run:
+          name: Install aws cli
+          command: |
+            apk add curl
+            apk add --upgrade bash
+            apk add --update ansible
+            apk add openssh-client
+            pip3 install awscli
+
       - run:
           name: Configure server
           command: |
