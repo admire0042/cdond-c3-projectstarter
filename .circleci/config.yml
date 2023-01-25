@@ -2,6 +2,21 @@ version: 2.1
 
 commands:
 
+ 
+  dependencies:
+    steps:
+      - run:
+          name: Installing necessary packages
+          command: |
+            sudo apt update
+            sudo apt install -y tar gzip curl software-properties-common
+      - run:
+          name: Installing aws-cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+
   install-ansible: 
       description: Install Ansible
       steps:
@@ -40,7 +55,7 @@ commands:
           when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS=$(curl --insecure "https://kvdb.io/Gihzln9tKaS8UmwtTTnRhb/migration_<<parameters.workflow_id>>")
+            SUCCESS=$(curl --insecure "https://kvdb.io/KSM56FiMvHq5eCbQF1e4NV/migration_<<parameters.workflow_id>>")
             if(( $SUCCESS==1 )); 
             then
               cd ~/project/backend
@@ -164,6 +179,7 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      - dependencies
       - run:
           name: Insstall dependencies
           command: |
@@ -248,9 +264,9 @@ jobs:
       - run:
           name: Send migration results to kvdb
           command: |
-            if grep -q "has been executed successfully"  ./backend/migrations_dump.txt   
+            if grep -q "has been executed successfully"  ~/project/backend/migrations_dump.txt   
             then
-              curl  https://kvdb.io/KSM56FiMvHq5eCbQF1e4NV/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d "1"
+              curl --insecure https://kvdb.io/KSM56FiMvHq5eCbQF1e4NV/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d "1"
             
             fi
       - destroy-environment
