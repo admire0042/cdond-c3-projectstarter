@@ -7,7 +7,7 @@
 - name: "Install Node.js 13"
   become: true
   apt:
-    name: ["node.js"]
+    name: ["nodejs"]
     state: latest
     update_cache: yes
 
@@ -16,7 +16,7 @@
     name: pm2
     global: yes
 
-- name: "move env variables to /etc/profile.d"
+- name: "move env variables to /etc/profile.d/"
   become: true
   copy:
     src: env.sh
